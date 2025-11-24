@@ -54,12 +54,32 @@ def parse_ping_time(output):
     return -1
     
 def insert_log(data):
-    # TODO: Insert one row of system info into SQLite
-    pass
+    # Insert one row of system info into SQLite
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(
+        """
+        INSERT INTO system_log (timestamp, cpu, memory, disk, ping_status, ping_ms)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (data[0], data[1], data[2], data[3], data[4], data[5])
+    )
+    conn.commit()
+    conn.close()
 
 def show_last_entries(limit=5):
-    # TODO: Retrieve and print the last few records from the database
-    pass
+    # Retrieve and print the last few records from the database
+    conn = sqlite3.connect(DB_NAME)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, timestamp, cpu, memory, disk, ping_status, ping_ms FROM system_log ORDER BY id DESC LIMIT ?",
+        (limit,)
+    )
+    rows = cursor.fetchall()
+    conn.close()
+    print(f"Last {limit} entries (newest first):")
+    for r in rows:
+        print(r)
 
 if __name__ == "__main__":
     init_db()
